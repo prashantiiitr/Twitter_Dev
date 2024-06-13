@@ -1,19 +1,25 @@
-const express=require('express');
-const connect=require('./config/database');
-const Tweet=require('./models/tweet');
-const Comment=require('./models/comments');
+import express from 'express';
+import bodyParser from 'body-parser';
+import passport from 'passport';
 
-const TweetRepository=require('./repository/tweet-repository');
+import {connect} from './config/database.js';
 
-const app=express();
+import { passportAuth } from './config/jwt-middleware.js';
 
-app.listen(3000,async ()=>{
-    console.log("Server started");
+import apiRoutes from './routes/index.js';
+
+const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+
+app.use(passport.initialize());
+passportAuth(passport);
+
+app.use('/api', apiRoutes);
+
+
+app.listen(3000, async () => {
+    console.log('server started');
     await connect();
-    console.log("mongodb connected");
-    const tweets=await Tweet.find({
-        content:{
-            $all:["First Tweet"]
-        }
-    })
+    console.log('Mongo db connected');
 });
